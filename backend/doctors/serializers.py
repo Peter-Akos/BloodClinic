@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from doctors.models import Doctor, Clinic, Donor, BloodBag, DoctorsDonors
 from rest_framework.exceptions import ValidationError
@@ -29,12 +30,24 @@ class DoctorSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Doctor
         fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Doctor.objects.all(),
+                fields=['name', 'title', 'hospital']
+            )
+        ]
 
 
 class ClinicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clinic
         fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Clinic.objects.all(),
+                fields=['name', 'address']
+            )
+        ]
 
 
 class DoctorSerializerDetails(serializers.ModelSerializer):
@@ -77,6 +90,12 @@ class DonorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donor
         fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Clinic.objects.all(),
+                fields=['name', 'birthday']
+            )
+        ]
 
 
 class BloodBagSerializer(serializers.ModelSerializer):
@@ -99,6 +118,11 @@ class DonorsOfDoctorSerializer(serializers.ModelSerializer):
         fields = ['donor']
         write_only_fields = ['id', 'doctor']
 
+
+class DoctorsDonorsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorsDonors
+        fields = "__all__"
 
 class DoctorSerializerReport(DynamicFieldsModelSerializer):
     avg_collected_blood = serializers.IntegerField(
